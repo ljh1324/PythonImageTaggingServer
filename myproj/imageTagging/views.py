@@ -32,7 +32,8 @@ def image(request):
 
     dataList = []
     for f in request.FILES.getlist('files[]'):
-      img = Image.open(f)
+      img = Image.open(f).convert('RGB')
+
       resizedImg = img.resize(defines.IMAGE_SIZE, Image.ANTIALIAS)
       imgNumpy = np.asarray(resizedImg)
       dataList.append(imgNumpy)
@@ -46,9 +47,12 @@ def image(request):
       predicted = np.argmax(predicted, 1)
       print(predicted)
     
-    predicted = json.dumps(predicted.tolist())
+    labelList = []
+    for prediction in predicted:
+      labelList.append(defines.LABEL_DATA[prediction])
+    labelList = json.dumps(labelList)
     data = {
-      'prediction': predicted
+      'prediction': labelList
     }
 
     return JsonResponse(data)
