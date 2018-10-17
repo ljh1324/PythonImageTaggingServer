@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 import json
 import numpy as np
@@ -32,19 +33,24 @@ def image(request):
     dataList = []
     for f in request.FILES.getlist('files[]'):
       img = Image.open(f)
-      resizedImg = img.resize((256, 256), Image.ANTIALIAS)
+      resizedImg = img.resize(defines.IMAGE_SIZE, Image.ANTIALIAS)
       imgNumpy = np.asarray(resizedImg)
       dataList.append(imgNumpy)
       print(img)
       print(imgNumpy)
 
     dataList = np.array(dataList)
-    
+
     with graph.as_default():
       predicted = model.predict(x=dataList)
       predicted = np.argmax(predicted, 1)
       print(predicted)
+    
+    predicted = json.dumps(predicted.tolist())
+    data = {
+      'prediction': predicted
+    }
 
-    return HttpResponse('image class')
+    return JsonResponse(data)
   else:
     return HttpResponse('nope')
