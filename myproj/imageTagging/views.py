@@ -15,6 +15,7 @@ from PIL import Image
 
 from .scripts import models
 from .scripts import defines
+from .scripts import utils
 
 graph = tf.get_default_graph()
 model = models.model(defines.IMAGE_SIZE, defines.LABEL_SIZE)
@@ -43,12 +44,13 @@ def image(request):
     dataList = np.array(dataList)
 
     with graph.as_default():
-      predicted = model.predict(x=dataList)
-      predicted = np.argmax(predicted, 1)
-      print(predicted)
+      predictionList = model.predict(x=dataList)
+      predictionList = utils.surePredict(predictionList)
+      #predicted = np.argmax(predicted, 1)
+      print(predictionList)
     
     labelList = []
-    for prediction in predicted:
+    for prediction in predictionList:
       labelList.append(defines.LABEL_DATA[prediction])
     labelList = json.dumps(labelList)
     data = {
